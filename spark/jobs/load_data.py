@@ -9,7 +9,7 @@ PORT = int(os.getenv("REDIS_PORT", 6379))
 # Connect to Redis
 r = redis.Redis(host=HOST, port=PORT, db=0)
 
-DATASET = os.getenv("DATASET", "small")  # "small" or "normal"
+DATASET = os.getenv("dataset", "small")  # "small" or "normal"
 
 if DATASET == "small":
     data_path = "/spark/data/ml-latest-small/"
