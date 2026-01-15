@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>TMDb Ratings Demo</title>
+  <style>
+    /* ---------- CSS RESET ---------- */
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #102e54;
+      color: #e5e7eb;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* ---------- PAGE LAYOUT ---------- */
+    body {
+      padding: 1.5rem 2rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 5rem;
+      letter-spacing: -0.02em;
+
+    }
+
+    p {
+      margin-top: 0;
+      color: #9ca3af;
+    }
+
+    /* ---------- STATUS TEXT ---------- */
+    #status {
+      margin: 1rem 0 1.5rem;
+      font-size: 0.9rem;
+      color: #facc15;
+    }
+
+    /* ---------- GRID ---------- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* ---------- MOVIE CARD ---------- */
+    .card {
+      background: linear-gradient(180deg, #111827, #0b0f14);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    /* ---------- POSTER ---------- */
+    .card img {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      display: block;
+      background: #020617;
+    }
+
+    /* ---------- CARD CONTENT ---------- */
+    .card-content {
+      padding: 0.75rem 0.85rem 1rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.25;
+      margin-bottom: 0.4rem;
+    }
+
+    /* ---------- RATING ---------- */
+    .card-rating {
+      font-size: 0.85rem;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.2rem;
+    }
+
+    /* ---------- OPTIONAL TAGS ---------- */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.4rem;
+    }
+
+    .tag {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #9ca3af;
+    }
+
+    /* ---------- LINKS ---------- */
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Recommended Movies</h1>
+  <div id="movies" class="grid"></div>
+
+  <script>
+    const container = document.getElementById("movies");
+    window.onload = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("request_token");
+      if (!token) return;
+
+      try {
+        //const res1 = await fetch(
+        //  `http://127.0.0.1:8000/api/get-ratings?request_token=${token}`
+        //);
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/demo-movies`);
+        const data = await res.json();
+
+        container.innerHTML = "";
+
+        // data.rated_movies.forEach(movie => {
+        data.movies.forEach(movie => {
+          const poster = movie.poster_path
+            ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+            : "";
+
+          // Generate tags HTML dynamically
+          let tagsHtml = "";
+          if (Array.isArray(movie.tags)) {
+            movie.tags.forEach(tag => {
+              tagsHtml += `<span class=\"tag\">${tag}</span>`;
+            });
+          }
+
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <a href="https://www.themoviedb.org/movie/${movie.tmdbId}" target="_blank">
+              ${poster ? `<img src="${poster}" alt="${movie.title}">` : ""}
+              <div class="card-content">
+                  <div class="card-title" style="margin-bottom: 0;">${movie.title}</div>
+                  <div class="card-rating" title="User rating"> ${movie.rating}</div>
+                  <div class="tags">
+                    ${tagsHtml}
+                  </div>
+              </div>
+            </a>
+          `;
+
+          container.appendChild(card);
+        });
+      } catch (err) {
+        container.innerHTML = "<p>Error fetching ratings.</p>";
+        console.error(err);
+      }
+    };
+  </script>
+</body>
+
+</html>

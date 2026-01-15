@@ -4,6 +4,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 import requests
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI(
     title="TMDb Ratings Demo",
@@ -23,6 +25,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.get("/")
+def index():
+    return FileResponse("static/index.html")
 
 
 @app.get("/api/request-token")
@@ -83,6 +91,7 @@ def tmdb_callback(request: Request, request_token: str):
     # For demo purposes, return JSON to frontend
     return {"rated_movies": data}
 
+
 @app.get("/api/demo-movies")
 def demo_movies():
     return {
@@ -91,25 +100,29 @@ def demo_movies():
                 "tmdbId": 550,
                 "title": "Fight Club",
                 "rating": 4.7,
-                "poster_path": "/a26cQPRhJPX6GbWfQbvZdrrp9j9.jpg"
+                "poster_path": "/a26cQPRhJPX6GbWfQbvZdrrp9j9.jpg",
+                "tags": ["Drama"]
             },
             {
                 "tmdbId": 857,
                 "title": "Saving Private Ryan",
                 "rating": 4.8,
-                "poster_path": "/uqx37cS8cpHg8U35f9U5IBlrCV3.jpg"
+                "poster_path": "/uqx37cS8cpHg8U35f9U5IBlrCV3.jpg",
+                "tags": ["Drama", "War"]
             },
             {
                 "tmdbId": 8741,
                 "title": "Paths of Glory",
                 "rating": 4.6,
-                "poster_path": "/seMydAaoxQP6F0xbE1jOcTmn5Jr.jpg"
+                "poster_path": "/seMydAaoxQP6F0xbE1jOcTmn5Jr.jpg",
+                "tags": ["Drama", "War"]
             },
             {
                 "tmdbId": 28,
                 "title": "Apocalypse Now",
                 "rating": 4.9,
-                "poster_path": "/gQB8Y5RCMkv2zwzFHbUJX3kAhvA.jpg"
+                "poster_path": "/gQB8Y5RCMkv2zwzFHbUJX3kAhvA.jpg",
+                "tags": ["Drama", "War"]
             }
         ]
     }
