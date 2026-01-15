@@ -4,13 +4,13 @@
 
 ```mermaid
     %%{init: {"theme": "default", "themeVariables": {"background":"#ffffff"}}}%%
-    graph BT
+  graph BT
     subgraph Network_tmdb-net[<b>Network: tmdb-net</b>]
-        tmdb-redis["<b>tmdb-redis</b>"]
-        spark-master["<b>spark-master</b><br/><small>apache/spark:3.5.1</small>"]
-        spark-worker["<b>spark-worker</b><br/><small>apache/spark:3.5.1</small>"]
-        job-runner["<b>job-runner</b><br/><small>apache/spark:3.5.1</small>"]
-        tmdb-backend["<b>tmdb-backend</b>"]
+      tmdb-redis["<b>tmdb-redis</b>"]
+      spark-master["<b>spark-master</b><br/><small>apache/spark:3.5.1</small>"]
+      spark-worker["<b>spark-worker</b><br/><small>apache/spark:3.5.1</small>"]
+      job-runner["<b>job-runner</b><br/><small>apache/spark:3.5.1</small>"]
+      tmdb-backend["<b>tmdb-backend</b>"]
     end
     style Network_tmdb-net fill:#EBDBD1,stroke:#DDCEBC,stroke-width:2,stroke-dasharray:0
     tmdb-redis["<b>tmdb-redis</b><br/><small>v7-alpine</small>"]
@@ -37,6 +37,7 @@
     style spark-worker fill:#CC2336,stroke:#A22160,stroke-width:3,stroke-dasharray:0
     style job-runner fill:#C78DAF,stroke:#797497,stroke-width:3,stroke-dasharray:0
     style tmdb-backend fill:#479387,stroke:#2c5952,stroke-width:3,stroke-dasharray:0
+
 
 ```
 
