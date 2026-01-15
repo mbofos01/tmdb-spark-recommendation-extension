@@ -131,6 +131,57 @@
         font-size: 1.4rem;
       }
     }
+
+    /* Poster fixes */
+    .card img.card-poster {
+      width: 100%;
+      height: auto;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      object-fit: cover;
+    }
+
+    /* Card content padding */
+    .card-content {
+      padding: 0.75rem 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    /* Card title styling */
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.2;
+      color: #f3f4f6;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    /* Rating styling */
+    .card-rating {
+      font-size: 0.85rem;
+      color: #fbbf24;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Tags styling */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .tag {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #9ca3af;
+    }
   </style>
 </head>
 
@@ -190,9 +241,11 @@
             : "";
 
           let tagsHtml = "";
-          if (Array.isArray(movie.tags)) {
-            movie.tags.forEach(tag => {
-              tagsHtml += `<span class="tag">${tag}</span>`;
+          // genres are separated by | in the API response
+          genres = movie.genres ? movie.genres.split("|") : [];
+          if (Array.isArray(genres)) {
+            genres.forEach(genre => {
+              tagsHtml += `<span class="tag">${genre}</span>`;
             });
           }
 
@@ -203,7 +256,7 @@
           ${poster ? `<img src="${poster}" alt="${movie.title}">` : ""}
           <div class="card-content">
             <div class="card-title">${movie.title}</div>
-            <div class="card-rating" title="User rating">${movie.rating}</div>
+            <div class="card-rating" title="User rating">${Number(movie.vote_average).toFixed(2)}/10 (${movie.vote_count} votes)</div>
             <div class="tags">${tagsHtml}</div>
           </div>
         </a>

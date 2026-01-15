@@ -44,7 +44,7 @@ def sanitize_floats(d):
     return {k: (v if not isinstance(v, float) or math.isfinite(v) else 0.0) for k, v in d.items()}
 
 
-def get_poster_url(id) -> str:
+def get_movie_info(id) -> str:
     print(f"Fetching poster for TMDb ID {id}")
     url = f"https://api.themoviedb.org/3/movie/{id}?language=en-US"
 
@@ -57,8 +57,10 @@ def get_poster_url(id) -> str:
     if response.status_code != 200:
         return None
 
+
     try:
-        return response.json()['poster_path']
+        info = response.json()
+        return {"poster_path": info.get("poster_path"), "vote_average": info.get("vote_average"), "vote_count": info.get("vote_count")}
     except Exception:
         return None
 
@@ -185,9 +187,11 @@ def tmdb_callback(request: Request, request_token: str = None, user_id: str = No
             meta["score"] = score
             meta["url"] = f"https://www.themoviedb.org/movie/{meta['tmdbId']}"
             if not meta.get("poster_path"):
-                poster = get_poster_url(movie_id)
-                if poster:
-                    meta["poster_path"] = poster
+                info = get_movie_info(movie_id)
+                if info and info.get("poster_path"):
+                    meta["poster_path"] = info["poster_path"]
+                    meta["vote_average"] = info.get("vote_average")
+                    meta["vote_count"] = info.get("vote_count")
                     r.set(f"movie:{movie_id}", json.dumps(meta))
                 else:
                     print("No poster found")

@@ -1,13 +1,93 @@
+x-wharfmap:
+  networks:
+    tmdb-net:
+      color: "#EBDBD1"          # Light blue for frontend network
+      border-color: "#DDCEBC"
+      border-width: "2px"
+      border-style: "solid"
+
 services:
   redis:
     image: redis:7-alpine
     container_name: tmdb-redis
+    networks:
+      - tmdb-net
     ports:
       - "6379:6379"
+    x-wharfmap:
+      color: "#D82C20"           # Fill/background color
+      border-color: "#7A0C00"    # Border color
+      border-width: "3px"        # Border thickness (with units)
+      border-style: "solid"     # Border style: "solid" or "dashed"
+
+  spark-master:
+    build:
+      context: ./spark
+    container_name: spark-master
+    networks:
+      - tmdb-net
+    depends_on:
+      redis:
+        condition: service_started
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    command: /bin/bash -c "/opt/spark/sbin/start-master.sh && tail -f /dev/null"
+    volumes:
+      - ./spark:/spark
+    x-wharfmap:
+      color: "#F69824"           # Fill/background color
+      border-color: "#E4682A"    # Border color
+      border-width: "3px"        # Border thickness (with units)
+      border-style: "solid"     # Border style: "solid" or "dashed"
+
+  spark-worker:
+    build:
+      context: ./spark
+    container_name: spark-worker
+    networks:
+      - tmdb-net
+    depends_on:
+      spark-master:
+        condition: service_started
+    command: /bin/bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 --cores 2 --memory 512m && tail -f /dev/null"
+    volumes:
+      - ./spark:/spark
+    x-wharfmap:
+      color: "#CC2336"           # Fill/background color
+      border-color: "#A22160"    # Border color
+      border-width: "3px"        # Border thickness (with units)
+      border-style: "solid"     # Border style: "solid" or "dashed"
+  
+  job-runner:
+    build:
+      context: ./spark
+    container_name: job-runner
+    networks:
+      - tmdb-net
+    depends_on:
+      spark-worker:
+        condition: service_started
+    volumes:
+      - ./spark:/spark
+    command: /bin/bash -c "\
+      /opt/spark/bin/spark-submit --master spark://spark-master:7077   --executor-memory 512m   --total-executor-cores 2   /spark/jobs/train_als.py && \
+      python3 /spark/jobs/load_data.py"
+    x-wharfmap:
+      color: "#C78DAF"           # Fill/background color
+      border-color: "#797497"    # Border color
+      border-width: "3px"        # Border thickness (with units)
+      border-style: "solid"     # Border style: "solid" or "dashed"
+
   backend:
     build:
       context: ./backend
     container_name: tmdb-backend
+    networks:
+      - tmdb-net
     ports:
       - "8000:8000"
     volumes:
@@ -17,32 +97,21 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      - spark-master
-      - spark-worker
-      - redis
+      job-runner:
+        condition: service_completed_successfully
+      spark-master:
+        condition: service_started
+      spark-worker:
+        condition: service_started
+      redis:
+        condition: service_started
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    x-wharfmap:
+      color: "#479387"           # Fill/background color
+      border-color: "#2c5952"    # Border color
+      border-width: "3px"        # Border thickness (with units)
+      border-style: "solid"     # Border style: "solid" or "dashed"
 
-
-  spark-master:
-      build:
-        context: ./spark
-      container_name: spark-master
-      environment:
-        - REDIS_HOST=redis
-        - REDIS_PORT=6379
-      ports:
-        - "7077:7077"
-        - "8080:8080"
-      command: /bin/bash -c "/opt/spark/sbin/start-master.sh && tail -f /dev/null"
-      volumes:
-        - ./spark:/spark
-
-  spark-worker:
-    build:
-      context: ./spark
-    container_name: spark-worker
-    depends_on:
-      - spark-master
-    command: /bin/bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 --cores 2 --memory 512m && tail -f /dev/null"
-    volumes:
-      - ./spark:/spark
+networks:
+  tmdb-net:
+    driver: bridge
