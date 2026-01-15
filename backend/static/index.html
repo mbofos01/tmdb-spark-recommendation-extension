@@ -140,6 +140,29 @@
       object-fit: cover;
     }
 
+    /* Unused movie badge */
+    .unused-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #6b7280cc;
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 0.25em 0.7em;
+      border-radius: 999px;
+      z-index: 2;
+      font-weight: 600;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+
+    .card.unused .card-poster {
+      filter: grayscale(0.85) brightness(0.85);
+    }
+    .card.unused {
+      opacity: 0.85;
+    }
+
     /* Card content padding */
     .card-content {
       padding: 0.75rem 1rem 1rem;
@@ -168,6 +191,10 @@
       gap: 0.25rem;
     }
 
+    .user-rating {
+      color: #34d399; /* green color for user rating */
+    }
+
     /* Tags styling */
     .tags {
       display: flex;
@@ -186,10 +213,13 @@
 </head>
 
 <body>
+  <h1>User's Liked Movies</h1>
+  <div id="liked-movies" class="grid"></div>
   <h1>Recommended Movies</h1>
   <div id="movies" class="grid"></div>
   <script>
     const container = document.getElementById("movies");
+    const likedContainer = document.getElementById("liked-movies");
 
     // Unique identifier for the user (can be generated once per browser)
     const USER_ID_KEY = "user_id";
@@ -252,7 +282,7 @@
           const card = document.createElement("div");
           card.className = "card";
           card.innerHTML = `
-        <a href="https://www.themoviedb.org/movie/${movie.tmdbId}" target="_blank">
+        <a href="${movie.url}" target="_blank">
           ${poster ? `<img src="${poster}" alt="${movie.title}">` : ""}
           <div class="card-content">
             <div class="card-title">${movie.title}</div>
@@ -262,6 +292,69 @@
         </a>
       `;
           container.appendChild(card);
+        });
+
+        likedContainer.innerHTML = "";
+        data.used_movies.forEach(movie => {
+          const poster = movie.poster_path
+            ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+            : "";
+
+          let tagsHtml = "";
+          // genres are separated by | in the API response
+          genres = movie.genres ? movie.genres.split("|") : [];
+          if (Array.isArray(genres)) {
+            genres.forEach(genre => {
+              tagsHtml += `<span class="tag">${genre}</span>`;
+            });
+          }
+
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+        <a href="${movie.url}" target="_blank">
+          ${poster ? `<img src="${poster}" alt="${movie.title}">` : ""}
+          <div class="card-content">
+            <div class="card-title">${movie.title}</div>
+            <div class="card-rating" title="User rating">${Number(movie.vote_average).toFixed(2)}/10 (${movie.vote_count} votes)</div>
+            <div class="card-rating user-rating" title="Your rating">Your rating: ${Number(movie.user_rating).toFixed(1)}/10</div>
+            <div class="tags">${tagsHtml}</div>
+          </div>
+        </a>
+      `;
+          likedContainer.appendChild(card);
+        });
+
+        data.unused_movies.forEach(movie => {
+          const poster = movie.poster_path
+            ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+            : "";
+
+          let tagsHtml = "";
+          // genres are separated by | in the API response
+          genres = movie.genres ? movie.genres.split("|") : [];
+          if (Array.isArray(genres)) {
+            genres.forEach(genre => {
+              tagsHtml += `<span class="tag">${genre}</span>`;
+            });
+          }
+
+          const card = document.createElement("div");
+          card.className = "card unused";
+          card.style.position = "relative";
+          card.innerHTML = `
+        <a href="${movie.url}" target="_blank">
+          <span class="unused-badge">Not used</span>
+          ${poster ? `<img src="${poster}" alt="${movie.title}" class="card-poster">` : ""}
+          <div class="card-content">
+            <div class="card-title">${movie.title}</div>
+            <div class="card-rating" title="User rating">${Number(movie.vote_average).toFixed(2)}/10 (${movie.vote_count} votes)</div>
+            <div class="card-rating user-rating" title="Your rating">Your rating: ${Number(movie.user_rating).toFixed(1)}/10</div>
+            <div class="tags">${tagsHtml}</div>
+          </div>
+        </a>
+      `;
+          likedContainer.appendChild(card);
         });
 
       } catch (err) {

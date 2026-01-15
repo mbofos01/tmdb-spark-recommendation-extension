@@ -57,10 +57,9 @@ def get_movie_info(id) -> str:
     if response.status_code != 200:
         return None
 
-
     try:
         info = response.json()
-        return {"poster_path": info.get("poster_path"), "vote_average": info.get("vote_average"), "vote_count": info.get("vote_count")}
+        return {"poster_path": info.get("poster_path"), "vote_average": info.get("vote_average"), "vote_count": info.get("vote_count"), "title": info.get("title")}
     except Exception:
         return None
 
@@ -143,11 +142,13 @@ def tmdb_callback(request: Request, request_token: str = None, user_id: str = No
 
     # Step 5: Filter only movies present in Redis
     filtered_liked = []
+    unused_liked = []
     for mid, rating in liked_movies:
         movie_instance = r.get(f"movie:{mid}")
         if movie_instance:
             filtered_liked.append((mid, rating))
         else:
+            unused_liked.append((mid, rating))
             print(f"Skipping TMDb ID {mid} – not found in Redis")
 
     liked_movies = filtered_liked
@@ -196,8 +197,40 @@ def tmdb_callback(request: Request, request_token: str = None, user_id: str = No
                 else:
                     print("No poster found")
                     continue
-                
+
             enriched.append(meta)
 
+    enriched_liked = []
+    for lm in liked_movies:
+        data = r.get(f"movie:{lm[0]}")
+        if data:
+            meta = json.loads(data)
+            meta["user_rating"] = lm[1]
+            meta["url"] = f"https://www.themoviedb.org/movie/{meta['tmdbId']}"
+            if not meta.get("poster_path"):
+                info = get_movie_info(lm[0])
+                if info and info.get("poster_path"):
+                    meta["poster_path"] = info["poster_path"]
+                    meta["vote_average"] = info.get("vote_average")
+                    meta["vote_count"] = info.get("vote_count")
+                    r.set(f"movie:{lm[0]}", json.dumps(meta))
+                else:
+                    print("No poster found for liked movie")
+                    continue
+        enriched_liked.append(meta)
+
+    enriched_unused_liked = []
+    for lm in unused_liked:
+        meta = {}
+        meta["url"] = f"https://www.themoviedb.org/movie/{lm[0]}"
+        info = get_movie_info(lm[0])
+        if info and info.get("poster_path"):
+            meta["poster_path"] = info["poster_path"]
+            meta["vote_average"] = info.get("vote_average")
+            meta["title"] = info.get("title")
+            meta["vote_count"] = info.get("vote_count")
+            meta["user_rating"] = lm[1]
+        enriched_unused_liked.append(meta)
+
     # Sanitize floats and return
-    return {"recommendations": [sanitize_floats(m) for m in enriched]}
+    return {"recommendations": [sanitize_floats(m) for m in enriched], "used_movies":  [sanitize_floats(m) for m in enriched_liked], "unused_movies": [sanitize_floats(m) for m in enriched_unused_liked]}
