@@ -137,61 +137,89 @@
 <body>
   <h1>Recommended Movies</h1>
   <div id="movies" class="grid"></div>
-
   <script>
     const container = document.getElementById("movies");
+
+    // Unique identifier for the user (can be generated once per browser)
+    const USER_ID_KEY = "user_id";
+    let userId = localStorage.getItem(USER_ID_KEY);
+    if (!userId) {
+      userId = crypto.randomUUID();
+      localStorage.setItem(USER_ID_KEY, userId);
+    }
+
+    // Function to redirect user to TMDb authentication
+    async function redirectToTmdbAuth() {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/request-token");
+        const data = await res.json();
+        const requestToken = data.request_token;
+
+        const redirectUrl = encodeURIComponent("http://127.0.0.1:8000/");
+        const tmdbUrl = `https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${redirectUrl}`;
+
+        window.location.href = tmdbUrl; // redirect user to TMDb
+      } catch (err) {
+        console.error("Failed to get TMDb request token:", err);
+        container.innerHTML = "<p>Unable to connect to TMDb. Try again later.</p>";
+      }
+    }
+
     window.onload = async () => {
       const params = new URLSearchParams(window.location.search);
-      const token = params.get("request_token");
-      if (!token) return;
+      const requestToken = params.get("request_token"); // token from TMDb redirect
+
+      let url = `http://127.0.0.1:8000/api/get-recommendations?user_id=${userId}&top_n=20`;
+      if (requestToken) url += `&request_token=${requestToken}`;
 
       try {
-        //const res1 = await fetch(
-        //  `http://127.0.0.1:8000/api/get-ratings?request_token=${token}`
-        //);
-        const res = await fetch(
-          `http://127.0.0.1:8000/api/get-recommendations?request_token=${token}&top_n=20`);
+        const res = await fetch(url);
         const data = await res.json();
+
+        if (data.error) {
+          console.warn("Session invalid or expired, redirecting to TMDb auth...");
+          await redirectToTmdbAuth();
+          return;
+        }
 
         container.innerHTML = "";
 
-        // data.rated_movies.forEach(movie => {
         data.recommendations.forEach(movie => {
           const poster = movie.poster_path
             ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
             : "";
 
-          // Generate tags HTML dynamically
           let tagsHtml = "";
           if (Array.isArray(movie.tags)) {
             movie.tags.forEach(tag => {
-              tagsHtml += `<span class=\"tag\">${tag}</span>`;
+              tagsHtml += `<span class="tag">${tag}</span>`;
             });
           }
 
           const card = document.createElement("div");
           card.className = "card";
           card.innerHTML = `
-            <a href="https://www.themoviedb.org/movie/${movie.tmdbId}" target="_blank">
-              ${poster ? `<img src="${poster}" alt="${movie.title}">` : ""}
-              <div class="card-content">
-                  <div class="card-title" style="margin-bottom: 0;">${movie.title}</div>
-                  <div class="card-rating" title="User rating"> ${movie.rating}</div>
-                  <div class="tags">
-                    ${tagsHtml}
-                  </div>
-              </div>
-            </a>
-          `;
-
+        <a href="https://www.themoviedb.org/movie/${movie.tmdbId}" target="_blank">
+          ${poster ? `<img src="${poster}" alt="${movie.title}">` : ""}
+          <div class="card-content">
+            <div class="card-title">${movie.title}</div>
+            <div class="card-rating" title="User rating">${movie.rating}</div>
+            <div class="tags">${tagsHtml}</div>
+          </div>
+        </a>
+      `;
           container.appendChild(card);
         });
+
       } catch (err) {
-        container.innerHTML = "<p>Error fetching ratings.</p>";
-        console.error(err);
+        console.error("Error fetching recommendations:", err);
+        container.innerHTML = "<p>Error fetching recommendations.</p>";
+        await redirectToTmdbAuth();
       }
     };
   </script>
+
+
 </body>
 
 </html>

@@ -81,35 +81,46 @@ def request_token():
 
 
 @app.get("/api/get-recommendations")
-def tmdb_callback(request: Request, request_token: str, top_n: int = 10):
+def tmdb_callback(request: Request, request_token: str = None, user_id: str = None, top_n: int = 10):
     """
     TMDb redirects here after the user approves the request token.
-    This endpoint exchanges the request token for a session ID,
-    then fetches the user’s rated movies.
+    Exchanges request token for session ID (if needed), then fetches user's rated movies.
     """
-    # Step 1: Create session ID using the request token
-    session_url = "https://api.themoviedb.org/3/authentication/session/new"
-    session_resp = requests.post(
-        session_url,
-        params={"api_key": TMDB_API_KEY},
-        json={"request_token": request_token}
-    ).json()
+    if not user_id:
+        return JSONResponse({"error": "Missing user_id"}, status_code=400)
 
-    if "session_id" not in session_resp:
-        return JSONResponse(content={"error": "Failed to create session"}, status_code=400)
+    # Step 0: Try to reuse existing session_id
+    session_id = r.get(f"user_session:{user_id}")
+    if session_id:
+        session_id = session_id.decode("utf-8")
+    else:
+        # Step 1: Exchange request token for session_id
+        if not request_token:
+            return JSONResponse({"error": "Missing request_token for first-time login"}, status_code=400)
 
-    session_id = session_resp["session_id"]
+        session_url = "https://api.themoviedb.org/3/authentication/session/new"
+        session_resp = requests.post(
+            session_url,
+            params={"api_key": TMDB_API_KEY},
+            json={"request_token": request_token}
+        ).json()
 
-    # Step 2: Get account details to fetch account ID
+        session_id = session_resp.get("session_id")
+        if not session_id:
+            return JSONResponse({"error": "Failed to create session. Token may be expired."}, status_code=400)
+
+        # Save session_id for future use
+        r.set(f"user_session:{user_id}", session_id)
+
+    # Step 2: Get account ID
     account_url = "https://api.themoviedb.org/3/account"
     account_resp = requests.get(
         account_url,
         params={"api_key": TMDB_API_KEY, "session_id": session_id}
     ).json()
     account_id = account_resp.get("id")
-
     if not account_id:
-        return JSONResponse(content={"error": "Failed to get account ID"}, status_code=400)
+        return JSONResponse({"error": "Failed to get account ID. Session may be invalid."}, status_code=400)
 
     # Step 3: Get user rated movies
     rated_url = f"https://api.themoviedb.org/3/account/{account_id}/rated/movies"
@@ -120,16 +131,15 @@ def tmdb_callback(request: Request, request_token: str, top_n: int = 10):
 
     rated_movies = rated_resp.get("results", [])
 
-    # Step 4: Map to tmdbId + rating
-    data = [{"tmdbId": m["id"], "rating": m["rating"]} for m in rated_movies]
-
+    # Step 4: Map to tmdbId + rating (existing logic)
     try:
-        liked_pairs = [(str(m["tmdbId"]), str(m["rating"])) for m in data]
+        liked_pairs = [(str(m["id"]), str(m["rating"])) for m in rated_movies]
         liked_movies = [(int(mid), float(rating))
                         for mid, rating in liked_pairs]
     except Exception:
         return {"error": "Something went wrong parsing ratings"}
 
+    # Step 5: Filter only movies present in Redis
     filtered_liked = []
     for mid, rating in liked_movies:
         movie_instance = r.get(f"movie:{mid}")
@@ -139,13 +149,14 @@ def tmdb_callback(request: Request, request_token: str, top_n: int = 10):
             print(f"Skipping TMDb ID {mid} – not found in Redis")
 
     liked_movies = filtered_liked
+
     for mid, rating in liked_movies:
         movie_instance = r.get(f"movie:{mid}")
         meta = json.loads(movie_instance)
         print(
             f"User liked movie TMDb ID {mid} ({meta['title']}) with rating {rating}")
 
-    # Get vectors of liked movies
+    # Step 6: Compute user vector & score items (existing ALS logic)
     liked_vectors = []
     weights = []
     for mid, rating in liked_movies:
@@ -158,32 +169,31 @@ def tmdb_callback(request: Request, request_token: str, top_n: int = 10):
     if not liked_vectors:
         return {"error": "No valid liked movies found"}
 
-    # Weighted average to compute synthetic user vector
     user_vector = [sum(v*w for v, w in zip(vals, weights))/sum(weights)
                    for vals in zip(*liked_vectors)]
 
-    # Score all items
     scored_items = [(item.id, sum(
         a*b for a, b in zip(user_vector, item.features))) for item in item_factors]
     scored_items.sort(key=lambda x: -x[1])
 
-    # Fetch metadata from Redis
+    # Step 7: Enrich with metadata from Redis (existing logic)
     enriched = []
     for movie_id, score in scored_items[:top_n]:
         data = r.get(f"movie:{movie_id}")
         if data:
             meta = json.loads(data)
-            meta["score"] = score  # add ALS score
+            meta["score"] = score
             meta["url"] = f"https://www.themoviedb.org/movie/{meta['tmdbId']}"
             if not meta.get("poster_path"):
-                # if meta.get("poster_path") is None:
                 poster = get_poster_url(movie_id)
-                if poster is None:
-                    print("No poster found")
-                    continue
-                else:
+                if poster:
                     meta["poster_path"] = poster
                     r.set(f"movie:{movie_id}", json.dumps(meta))
+                else:
+                    print("No poster found")
+                    continue
+                
             enriched.append(meta)
 
+    # Sanitize floats and return
     return {"recommendations": [sanitize_floats(m) for m in enriched]}
