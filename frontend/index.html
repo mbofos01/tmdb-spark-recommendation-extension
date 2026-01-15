@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>TMDb Ratings Demo</title>
+  <style>
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: Inter, sans-serif;
+    }
+
+    button {
+      background: #01b4e4;
+      color: black;
+      border: none;
+      border-radius: 6px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.2rem;
+      margin-top: 2rem;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .card img {
+      width: 100%;
+      display: block;
+    }
+
+    .card-body {
+      padding: 0.75rem;
+    }
+
+    .rating {
+      color: gold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>TMDb Ratings Demo</h1>
+  <button id="connect-tmdb">Connect TMDb</button>
+
+  <h2>Your Rated Movies</h2>
+  <div id="movies" class="grid"></div>
+
+  <script>
+    const connectButton = document.getElementById("connect-tmdb");
+    const ratingsTable = document.getElementById("ratings-table");
+    const ratingsBody = document.getElementById("ratings-body");
+
+    // Step 1: Request token and redirect to TMDb
+    connectButton.onclick = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/request-token");
+        const data = await res.json();
+        const requestToken = data.request_token;
+
+        const redirectUrl = encodeURIComponent(`http://127.0.0.1:5500/frontend/index.html`);
+        window.location.href = `https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${redirectUrl}&request_token=${requestToken}`;
+
+      } catch (err) {
+        alert("Failed to get TMDb request token.");
+        console.error(err);
+      }
+    };
+
+    // Step 2: On page load, check if redirected back with request_token
+    window.onload = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("request_token");
+      if (!token) return;
+
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/api/get-ratings?request_token=${token}`);
+        const data = await res.json();
+
+        const ratings = data.rated_movies;
+        const container = document.getElementById("movies");
+        container.innerHTML = "";
+
+        ratings.forEach(movie => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          card.innerHTML = `
+          <!-- <img src="https://image.tmdb.org/t/p/w300${movie.poster_path}"> -->
+          <div class="card-body">
+            <strong><a href="https://www.themoviedb.org/movie/${movie.tmdbId}">${movie.tmdbId}</a></strong>
+            <div class="rating">⭐ ${movie.rating}</div>
+          </div>
+        `;
+
+          container.appendChild(card);
+        });
+      } catch (err) {
+        const container = document.getElementById("movies");
+        container.innerHTML = "<p>Error fetching ratings.</p>";
+        console.error(err);
+      }
+    };
+
+  </script>
+</body>
+
+</html>
