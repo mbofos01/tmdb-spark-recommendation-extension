@@ -68,6 +68,9 @@ services:
     container_name: job-runner
     networks:
       - tmdb-net
+    environment:
+      # - dataset=small
+      - dataset=normal
     depends_on:
       spark-worker:
         condition: service_started

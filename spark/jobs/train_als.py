@@ -7,18 +7,27 @@ from dotenv import load_dotenv
 import os
 from pyspark.sql.functions import col
 
+load_dotenv()
+
 spark = SparkSession.builder.appName("ALS-MovieLens-Demo").getOrCreate()
+
+DATASET = os.getenv("DATASET", "small")  # "small" or "normal"
+
+if DATASET == "small":
+    data_path = "/spark/data/ml-latest-small/"
+else:
+    data_path = "/spark/data/ml-latest/"
 
 
 # Load MovieLens small ratings dataset
 ratings = spark.read.csv(
-    "/spark/data/ml-latest-small/ratings.csv",
+    f"{data_path}ratings.csv",
     header=True,
     inferSchema=True
 )
 
 links = spark.read.csv(
-    "/spark/data/ml-latest-small/links.csv",
+    f"{data_path}links.csv",
     header=True,
     inferSchema=False  # read everything as string
 )

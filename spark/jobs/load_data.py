@@ -9,15 +9,22 @@ PORT = int(os.getenv("REDIS_PORT", 6379))
 # Connect to Redis
 r = redis.Redis(host=HOST, port=PORT, db=0)
 
+DATASET = os.getenv("DATASET", "small")  # "small" or "normal"
+
+if DATASET == "small":
+    data_path = "/spark/data/ml-latest-small/"
+else:
+    data_path = "/spark/data/ml-latest/"
+
 # Load MovieLens data
 # movieId, title, genres
-movies_df = pd.read_csv("/spark/data/ml-latest-small/movies.csv")
+movies_df = pd.read_csv(f"{data_path}movies.csv")
 # movieId, imdbId, tmdbId
-links_df = pd.read_csv("/spark/data/ml-latest-small/links.csv")
+links_df = pd.read_csv(f"{data_path}links.csv")
 # optional: movieId, tag, userId
-tags_df = pd.read_csv("/spark/data/ml-latest-small/tags.csv")
+tags_df = pd.read_csv(f"{data_path}tags.csv")
 # ratings
-ratings_df = pd.read_csv("/spark/data/ml-latest-small/ratings.csv")
+ratings_df = pd.read_csv(f"{data_path}ratings.csv")
 avg_ratings = ratings_df.groupby("movieId")["rating"].mean().reset_index()
 avg_ratings.columns = ["movieId", "avg_rating"]
 
