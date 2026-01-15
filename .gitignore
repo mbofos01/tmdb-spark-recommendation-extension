@@ -207,3 +207,4 @@ marimo/_lsp/
 __marimo__/
 /spark/data/ml-latest-small
 /spark/data/ml-latest
+docker-compose.mermaid.txt
