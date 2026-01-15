@@ -150,13 +150,13 @@
         //  `http://127.0.0.1:8000/api/get-ratings?request_token=${token}`
         //);
         const res = await fetch(
-          `http://127.0.0.1:8000/api/demo-movies`);
+          `http://127.0.0.1:8000/api/get-recommendations?request_token=${token}&top_n=20`);
         const data = await res.json();
 
         container.innerHTML = "";
 
         // data.rated_movies.forEach(movie => {
-        data.movies.forEach(movie => {
+        data.recommendations.forEach(movie => {
           const poster = movie.poster_path
             ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
             : "";
