@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>TMDb Ratings Demo</title>
   <style>
     body {
-      background: #0d0d0d;
+      background: #1b2798;
       color: #fff;
-      font-family: Inter, sans-serif;
+      font-family: Inter, system-ui, sans-serif;
+      margin: 0;
+      padding: 1.5rem;
+    }
+
+    h1 {
+      margin-bottom: 0.5rem;
     }
 
     button {
@@ -15,13 +20,16 @@
       color: black;
       border: none;
       border-radius: 6px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-weight: 600;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 1.2rem;
-      margin-top: 2rem;
+      margin-top: 1.5rem;
     }
 
     .card {
@@ -29,87 +37,95 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
     }
 
     .card img {
       width: 100%;
-      display: block;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      background: #222;
     }
 
     .card-body {
       padding: 0.75rem;
     }
 
+    .title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
     .rating {
       color: gold;
+      font-size: 0.85rem;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 
 <body>
-  <h1>TMDb Ratings Demo</h1>
-  <button id="connect-tmdb">Connect TMDb</button>
-
-  <h2>Your Rated Movies</h2>
+  <h1>Recommended Movies</h1>
   <div id="movies" class="grid"></div>
 
   <script>
-    const connectButton = document.getElementById("connect-tmdb");
-    const ratingsTable = document.getElementById("ratings-table");
-    const ratingsBody = document.getElementById("ratings-body");
-
-    // Step 1: Request token and redirect to TMDb
-    connectButton.onclick = async () => {
-      try {
-        const res = await fetch("http://127.0.0.1:8000/api/request-token");
-        const data = await res.json();
-        const requestToken = data.request_token;
-
-        const redirectUrl = encodeURIComponent(`http://127.0.0.1:5500/frontend/index.html`);
-        window.location.href = `https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${redirectUrl}&request_token=${requestToken}`;
-
-      } catch (err) {
-        alert("Failed to get TMDb request token.");
-        console.error(err);
-      }
-    };
-
-    // Step 2: On page load, check if redirected back with request_token
+    const container = document.getElementById("movies");
     window.onload = async () => {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("request_token");
       if (!token) return;
 
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/get-ratings?request_token=${token}`);
+        //const res1 = await fetch(
+        //  `http://127.0.0.1:8000/api/get-ratings?request_token=${token}`
+        //);
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/demo-movies`);
         const data = await res.json();
 
-        const ratings = data.rated_movies;
-        const container = document.getElementById("movies");
         container.innerHTML = "";
 
-        ratings.forEach(movie => {
+        // data.rated_movies.forEach(movie => {
+        data.movies.forEach(movie => {
+          const poster = movie.poster_path
+            ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+            : "";
+
           const card = document.createElement("div");
           card.className = "card";
 
           card.innerHTML = `
-          <!-- <img src="https://image.tmdb.org/t/p/w300${movie.poster_path}"> -->
-          <div class="card-body">
-            <strong><a href="https://www.themoviedb.org/movie/${movie.tmdbId}">${movie.tmdbId}</a></strong>
-            <div class="rating">⭐ ${movie.rating}</div>
-          </div>
-        `;
+            <a href="https://www.themoviedb.org/movie/${movie.tmdbId}" target="_blank">
+              ${poster ? `<img src="${poster}" alt="${movie.title}">` : ""}
+              <div class="card-body">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div class="title" style="margin-bottom: 0;">${movie.title}</div>
+                  <div class="rating" title="User rating"> ${movie.rating}</div>
+                </div>
+              </div>
+            </a>
+          `;
 
           container.appendChild(card);
         });
       } catch (err) {
-        const container = document.getElementById("movies");
         container.innerHTML = "<p>Error fetching ratings.</p>";
         console.error(err);
       }
     };
-
   </script>
 </body>
-
 </html>
