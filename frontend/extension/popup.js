@@ -1,37 +1,19 @@
-const connectBtn = document.getElementById("connect");
-const table = document.getElementById("table");
-const body = document.getElementById("body");
+const btn = document.getElementById("connect");
+const status = document.getElementById("status");
 
-connectBtn.onclick = async () => {
+btn.onclick = async () => {
+  status.innerText = "Redirecting to TMDb...";
+
   const res = await fetch("http://127.0.0.1:8000/api/request-token");
   const data = await res.json();
 
   const redirectUrl = encodeURIComponent(
-    "http://127.0.0.1:5500/frontend/index.html"
+    `http://127.0.0.1:8000/`
   );
 
   const tmdbUrl =
     `https://www.themoviedb.org/authenticate/${data.request_token}` +
-    `?redirect_to=${redirectUrl}`;
+    `?redirect_to=${redirectUrl}&request_token=${data.request_token}`;
 
   chrome.tabs.create({ url: tmdbUrl });
 };
-
-// OPTIONAL: fetch ratings if session already exists
-async function loadRatings() {
-  const res = await fetch("http://127.0.0.1:8000/api/get-ratings");
-  if (!res.ok) return;
-
-  const data = await res.json();
-  body.innerHTML = "";
-
-  data.rated_movies.forEach(m => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${m.tmdbId}</td><td>${m.rating}</td>`;
-    body.appendChild(tr);
-  });
-
-  table.style.display = "table";
-}
-
-loadRatings();
