@@ -1,4 +1,9 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: tmdb-redis
+    ports:
+      - "6379:6379"
   backend:
     build:
       context: ./backend
@@ -12,11 +17,32 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
+      - spark-master
+      - spark-worker
       - redis
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-  redis:
-    image: redis:7-alpine
-    container_name: tmdb-redis
-    ports:
-      - "6379:6379"
+
+  spark-master:
+      build:
+        context: ./spark
+      container_name: spark-master
+      environment:
+        - REDIS_HOST=redis
+        - REDIS_PORT=6379
+      ports:
+        - "7077:7077"
+        - "8080:8080"
+      command: /bin/bash -c "/opt/spark/sbin/start-master.sh && tail -f /dev/null"
+      volumes:
+        - ./spark:/spark
+
+  spark-worker:
+    build:
+      context: ./spark
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    command: /bin/bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 --cores 2 --memory 512m && tail -f /dev/null"
+    volumes:
+      - ./spark:/spark
