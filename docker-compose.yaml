@@ -8,5 +8,15 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - PYTHONUNBUFFERED=1
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
+      - PYTHONUNBUFFERED=1  
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  redis:
+    image: redis:7-alpine
+    container_name: tmdb-redis
+    ports:
+      - "6379:6379"
