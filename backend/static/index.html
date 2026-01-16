@@ -75,22 +75,22 @@
     /* ---------- GRID ---------- */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.2rem;
     }
 
     /* ---------- MOVIE CARD ---------- */
     .card {
       background: linear-gradient(180deg, #111827, #0b0f14);
-      border-radius: 20px;
+      border-radius: 14px;
       overflow: hidden;
       box-shadow:
         0 14px 36px rgba(0, 0, 0, 0.50),
         inset 0 1px 0 rgba(255, 255, 255, 0.04);
       transition: transform 0.25s ease, box-shadow 0.25s ease;
       cursor: pointer;
-      min-width: 230px;
-      max-width: 320px;
+      min-width: 180px;
+      max-width: 240px;
     }
 
     .card:hover {
@@ -107,17 +107,17 @@
       object-fit: cover;
       display: block;
       background: #020617;
-      min-height: 345px;
-      max-height: 420px;
+      min-height: 270px;
+      max-height: 320px;
     }
 
     /* ---------- CARD CONTENT ---------- */
     .card-content {
-      padding: 1.1rem 1.2rem 1.3rem;
+      padding: 0.7rem 0.8rem 1rem;
     }
 
     .card-title {
-      font-size: 1.15rem;
+      font-size: 0.95rem;
       font-weight: 600;
       line-height: 1.25;
       margin-bottom: 0.4rem;
