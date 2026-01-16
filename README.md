@@ -108,7 +108,7 @@ networks:
 
 ## Example Screenshot
 
-![Frontend Screenshot](./screenshots/screenshot.png)
+![Frontend Screenshot](./screenshots/screenshot-large.png)
 
 ## Credits
 
