@@ -85,7 +85,6 @@ networks:
 ## Important Notes
 
 - To get personalized recommendations, you should have rated movies in your TMDb account. The system fetches your ratings from TMDb to generate recommendations.
-- The MovieLens dataset only extends up to 2018, so newer movies are not used in generating recommendations.
 - You must add the Chrome extension (found in `frontend/extension/`) to your browser to interact with the system and authenticate with TMDb.
 
 ## Quick Start
