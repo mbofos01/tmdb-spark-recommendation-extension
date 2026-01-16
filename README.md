@@ -63,8 +63,10 @@ This project demonstrates how to build a movie recommendation system using the A
     TMDB_BEARER_TOKEN=your_tmdb_bearer_token
     ```
 
-- **MovieLens Dataset**
-  - Download the [MovieLens dataset](https://grouplens.org/datasets/movielens/) (e.g., `ml-latest` or `ml-latest-small`) and place it in `spark/data/`.
+ - **MovieLens Dataset**
+   - Download the [MovieLens dataset](https://grouplens.org/datasets/movielens/). You can choose either the full dataset (`ml-latest`) for more data and better recommendations, or the small dataset (`ml-latest-small`) for faster setup and testing. Place your chosen dataset in `spark/data/`.
+
+   - You can select which dataset to use by setting an environment variable (e.g., `dataset=normal` or `dataset=small`) in your `docker-compose.yaml` file. This allows you to switch datasets without changing code.
 
 ## Docker Compose Structure
 
