@@ -126,7 +126,7 @@
               <!-- Rating -->
               <div class="card-rating mb-2" title="User rating">
                 <span class="text-warning fw-bold">{{ Number(movie.vote_average).toFixed(2) }}/10</span>
-                <span class="text-secondary">({{ movie.vote_count }} votes)</span>
+                <span class="text-secondary">&nbsp;({{ movie.vote_count }} votes)</span>
               </div>
 
               <!-- Progress / confidence bar -->
