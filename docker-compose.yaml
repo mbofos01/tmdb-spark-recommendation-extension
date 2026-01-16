@@ -53,7 +53,7 @@ services:
     depends_on:
       spark-master:
         condition: service_started
-    command: /bin/bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 --cores 2 --memory 512m && tail -f /dev/null"
+    command: /bin/bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 --cores 4 --memory 4g && tail -f /dev/null"
     volumes:
       - ./spark:/spark
     x-wharfmap:
@@ -77,7 +77,7 @@ services:
     volumes:
       - ./spark:/spark
     command: /bin/bash -c "\
-      /opt/spark/bin/spark-submit --master spark://spark-master:7077   --executor-memory 512m   --total-executor-cores 2   /spark/jobs/train_als.py && \
+      /opt/spark/bin/spark-submit --master spark://spark-master:7077   --executor-memory 4g   --total-executor-cores 6   --conf spark.sql.shuffle.partitions=200  /spark/jobs/train_als.py && \ 
       python3 /spark/jobs/load_data.py"
     x-wharfmap:
       color: "#C78DAF"           # Fill/background color

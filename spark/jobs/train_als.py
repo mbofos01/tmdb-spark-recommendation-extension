@@ -11,7 +11,7 @@ load_dotenv()
 
 spark = SparkSession.builder.appName("ALS-MovieLens-Demo").getOrCreate()
 
-DATASET = os.getenv("DATASET", "small")  # "small" or "normal"
+DATASET = os.getenv("dataset", "small")  # "small" or "normal"
 
 if DATASET == "small":
     data_path = "/spark/data/ml-latest-small/"
