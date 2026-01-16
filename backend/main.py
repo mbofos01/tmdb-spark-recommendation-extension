@@ -40,6 +40,11 @@ r = redis.Redis(host="tmdb-redis", port=6379, db=0)
 item_factors = pickle.loads(r.get("item_factors"))
 
 
+def compute_confidence(score, k=0.1):
+    # Sigmoid-based confidence, scaled to 0-100
+    return int(100 * (1 / (1 + math.exp(-k * score))))
+
+
 def sanitize_floats(d):
     return {k: (v if not isinstance(v, float) or math.isfinite(v) else 0.0) for k, v in d.items()}
 
@@ -181,11 +186,13 @@ def tmdb_callback(request: Request, request_token: str = None, user_id: str = No
 
     # Step 7: Enrich with metadata from Redis (existing logic)
     enriched = []
+
     for movie_id, score in scored_items[:top_n]:
         data = r.get(f"movie:{movie_id}")
         if data:
             meta = json.loads(data)
             meta["score"] = score
+            meta["confidence"] = compute_confidence(score)
             meta["url"] = f"https://www.themoviedb.org/movie/{meta['tmdbId']}"
             if not meta.get("poster_path"):
                 info = get_movie_info(movie_id)

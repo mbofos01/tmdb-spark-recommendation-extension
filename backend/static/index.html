@@ -4,6 +4,36 @@
 <head>
   <title>TMDb Ratings Demo</title>
   <style>
+        /* ---------- CONFIDENCE BAR ---------- */
+        .confidence-bar-container {
+          margin-top: 0.5rem;
+          background: #1e293b;
+          border-radius: 6px;
+          height: 16px;
+          width: 100%;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .confidence-bar {
+          height: 100%;
+          background: linear-gradient(90deg, #fbbf24 0%, #22d3ee 100%);
+          border-radius: 6px 0 0 6px;
+          transition: width 0.4s cubic-bezier(.4,2,.6,1);
+        }
+        .confidence-label {
+          position: absolute;
+          right: 10px;
+          top: 0;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          font-size: 0.8rem;
+          color: #fff;
+          font-weight: 600;
+          text-shadow: 0 1px 2px #000a;
+          pointer-events: none;
+        }
     /* ---------- CSS RESET ---------- */
     * {
       box-sizing: border-box;
@@ -291,7 +321,10 @@
           <div class="card-content">
             <div class="card-title">${movie.title}</div>
             <div class="card-rating" title="User rating">${Number(movie.vote_average).toFixed(2)}/10 (${movie.vote_count} votes)</div>
-            <div class="card-rating" title="Confidence score">Confidence: <b>${movie.confidence}</b>/100</div>
+            <div class="confidence-bar-container" title="Confidence score">
+              <div class="confidence-bar" style="width: ${movie.confidence}%;"></div>
+              <span class="confidence-label">${movie.confidence}/100</span>
+            </div>
             <div class="tags">${tagsHtml}</div>
           </div>
         </a>
