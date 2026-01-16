@@ -7,19 +7,19 @@
     graph BT
       subgraph Network_tmdb-net[<b>Network: tmdb-net</b>]
         tmdb-redis["<b>tmdb-redis</b>"]
-        spark-master["<b>spark-master</b><br/><small>apache/spark:3.5.1</small>"]
-        spark-worker["<b>spark-worker</b><br/><small>apache/spark:3.5.1</small>"]
-        job-runner["<b>job-runner</b><br/><small>apache/spark:3.5.1</small>"]
+        spark-master["<b>spark-master</b>"]
+        spark-worker["<b>spark-worker</b>"]
+        job-runner["<b>job-runner</b>"]
         tmdb-backend["<b>tmdb-backend</b>"]
         tmdb-frontend["<b>tmdb-frontend</b>"]
       end
       style Network_tmdb-net fill:#EBDBD1,stroke:#DDCEBC,stroke-width:2,stroke-dasharray:0
-      tmdb-redis["<b>tmdb-redis</b><br/><small>v7-alpine</small>"]
-      spark-master["<b>spark-master</b><br/><small>apache/spark:3.5.1</small>"]
-      spark-worker["<b>spark-worker</b><br/><small>apache/spark:3.5.1</small>"]
-      job-runner["<b>job-runner</b><br/><small>apache/spark:3.5.1</small>"]
-      tmdb-backend["<b>tmdb-backend</b><br/><small>📦 tmdb-backend:build</small>"]
-      tmdb-frontend["<b>tmdb-frontend</b><br/><small>Nuxt.js | 📦 tmdb-frontend:build</small>"]
+      tmdb-redis["<b>tmdb-redis</b>"]
+      spark-master["<b>spark-master</b>"]
+      spark-worker["<b>spark-worker</b>"]
+      job-runner["<b>job-runner</b>"]
+      tmdb-backend["<b>tmdb-backend</b>"]
+      tmdb-frontend["<b>tmdb-frontend</b>"]
       spark-master -- depends_on (service_started) --> tmdb-redis
       linkStyle 0 stroke-width:2,stroke-dasharray:2 3
       spark-worker -- depends_on (service_started) --> spark-master
