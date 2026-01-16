@@ -120,7 +120,7 @@ networks:
 
 ## Example Screenshot
 
-![Frontend Screenshot](./screenshots/screenshot-large.png)
+![Frontend Screenshot](./screenshots/screenshot-nuxt.png)
 
 ## Credits
 
