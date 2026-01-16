@@ -115,6 +115,23 @@ services:
       border-width: "3px"        # Border thickness (with units)
       border-style: "solid"     # Border style: "solid" or "dashed"
 
+  frontend:
+    build:
+      context: ./frontend/nuxt/tmdb-frontend
+    container_name: tmdb-frontend
+    networks:
+      - tmdb-net
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    x-wharfmap:
+      color: "#42b883"           # Fill/background color
+      border-color: "#35495e"    # Border color
+      border-width: "3px"        # Border thickness (with units)
+      border-style: "solid"     # Border style: "solid" or "dashed"
+
 networks:
   tmdb-net:
     driver: bridge

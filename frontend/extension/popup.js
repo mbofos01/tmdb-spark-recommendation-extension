@@ -7,9 +7,7 @@ btn.onclick = async () => {
   const res = await fetch("http://127.0.0.1:8000/api/request-token");
   const data = await res.json();
 
-  const redirectUrl = encodeURIComponent(
-    `http://127.0.0.1:8000/`
-  );
+  const redirectUrl = encodeURIComponent(`http://127.0.0.1:3000/`);
 
   const tmdbUrl =
     `https://www.themoviedb.org/authenticate/${data.request_token}` +
