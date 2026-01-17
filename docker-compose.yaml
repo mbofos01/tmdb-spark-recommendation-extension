@@ -5,12 +5,18 @@ x-wharfmap:
       border-color: "#DDCEBC"
       border-width: "2px"
       border-style: "solid"
+    spark-net:
+      color: "#5da2ec"          # Light yellow for spark network
+      border-color: "#2784e6"
+      border-width: "2px"
+      border-style: "solid"
 
 services:
   redis:
     image: redis:7-alpine
     container_name: tmdb-redis
     networks:
+      - spark-net
       - tmdb-net
     ports:
       - "6379:6379"
@@ -25,7 +31,7 @@ services:
       context: ./spark
     container_name: spark-master
     networks:
-      - tmdb-net
+      - spark-net
     depends_on:
       redis:
         condition: service_started
@@ -47,9 +53,9 @@ services:
   spark-worker:
     build:
       context: ./spark
-    container_name: spark-worker
+    # container_name: spark-worker
     networks:
-      - tmdb-net
+      - spark-net
     depends_on:
       spark-master:
         condition: service_started
@@ -67,10 +73,10 @@ services:
       context: ./spark
     container_name: job-runner
     networks:
-      - tmdb-net
+      - spark-net
     environment:
-      # - dataset=small
-      - dataset=normal
+      - dataset=small
+      # - dataset=normal
     depends_on:
       spark-worker:
         condition: service_started
@@ -134,4 +140,6 @@ services:
 
 networks:
   tmdb-net:
+    driver: bridge
+  spark-net:
     driver: bridge

@@ -5,11 +5,15 @@
 ```mermaid
     %%{init: {"theme": "default", "themeVariables": {"background":"#ffffff"}}}%%
     graph BT
-      subgraph Network_tmdb-net[<b>Network: tmdb-net</b>]
+      subgraph Network_spark-net[<b>Network: spark-net</b>]
         tmdb-redis["<b>tmdb-redis</b>"]
         spark-master["<b>spark-master</b>"]
         spark-worker["<b>spark-worker</b>"]
         job-runner["<b>job-runner</b>"]
+      end
+      style Network_spark-net fill:#5da2ec,stroke:#2784e6,stroke-width:2,stroke-dasharray:0
+      subgraph Network_tmdb-net[<b>Network: tmdb-net</b>]
+        tmdb-redis["<b>tmdb-redis</b>"]
         tmdb-backend["<b>tmdb-backend</b>"]
         tmdb-frontend["<b>tmdb-frontend</b>"]
       end
@@ -111,7 +115,7 @@ networks:
 4. Build and start the services:
 
    ```sh
-   docker-compose up --build
+   docker-compose up --scale spark-worker=2
    ```
 
 5. Access the backend API at [http://localhost:8000](http://localhost:8000)
