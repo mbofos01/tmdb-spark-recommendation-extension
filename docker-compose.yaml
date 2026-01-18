@@ -75,15 +75,15 @@ services:
     networks:
       - spark-net
     environment:
-      - dataset=small
-      # - dataset=normal
+      # - dataset=small
+      - dataset=normal
     depends_on:
       spark-worker:
         condition: service_started
     volumes:
       - ./spark:/spark
     command: /bin/bash -c "\
-      /opt/spark/bin/spark-submit --master spark://spark-master:7077   --executor-memory 4g   --total-executor-cores 6   --conf spark.sql.shuffle.partitions=200  /spark/jobs/train_als.py && \ 
+      /opt/spark/bin/spark-submit --master spark://spark-master:7077   --executor-memory 4g   --total-executor-cores 4   --conf spark.sql.shuffle.partitions=200  /spark/jobs/train_als.py && \ 
       python3 /spark/jobs/load_data.py"
     x-wharfmap:
       color: "#C78DAF"           # Fill/background color

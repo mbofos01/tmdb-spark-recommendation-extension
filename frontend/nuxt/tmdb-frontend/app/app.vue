@@ -3,7 +3,7 @@
     style="background: linear-gradient(180deg, #374151 0%, #1f2937 100%); color: #f3f4f6;">
     <div class="container py-4">
       <h1 class="display-4 text-center mb-5">Your Movie Dashboard</h1>
-      <p class="lead text-center mb-5">See your liked, unused, and recommended movies at a glance.</p>
+      <p class="lead text-center mb-5">See your liked and recommended movies at a glance.</p>
 
 
       <h2 class="h4 mb-3"><span class="badge bg-success me-2">Your Movies</span></h2>
