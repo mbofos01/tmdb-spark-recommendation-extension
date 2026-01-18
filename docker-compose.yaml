@@ -6,8 +6,8 @@ x-wharfmap:
       border-width: "2px"
       border-style: "solid"
     spark-net:
-      color: "#5da2ec"          # Light yellow for spark network
-      border-color: "#2784e6"
+      color: "#acbde5"          # Light yellow for spark network
+      border-color: "#8bb4df"
       border-width: "2px"
       border-style: "solid"
 
