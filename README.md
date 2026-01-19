@@ -7,23 +7,23 @@
     graph BT
       subgraph Network_spark-net[<b>Network: spark-net</b>]
         tmdb-redis["<b>tmdb-redis</b>"]
-        spark-master["<b>spark-master</b>"]
-        spark-worker["<b>spark-worker</b>"]
-        job-runner["<b>job-runner</b>"]
+        spark-master["<b>spark-master</b><br/><small>apache/spark:3.5.1</small>"]
+        spark-worker["<b>spark-worker</b><br/><small>apache/spark:3.5.1</small>"]
+        job-runner["<b>job-runner</b><br/><small>apache/spark:3.5.1</small>"]
       end
-      style Network_spark-net fill:#5da2ec,stroke:#2784e6,stroke-width:2,stroke-dasharray:0
+      style Network_spark-net fill:#acbde5,stroke:#8bb4df,stroke-width:2,stroke-dasharray:0
       subgraph Network_tmdb-net[<b>Network: tmdb-net</b>]
         tmdb-redis["<b>tmdb-redis</b>"]
         tmdb-backend["<b>tmdb-backend</b>"]
         tmdb-frontend["<b>tmdb-frontend</b>"]
       end
       style Network_tmdb-net fill:#EBDBD1,stroke:#DDCEBC,stroke-width:2,stroke-dasharray:0
-      tmdb-redis["<b>tmdb-redis</b>"]
-      spark-master["<b>spark-master</b>"]
-      spark-worker["<b>spark-worker</b>"]
-      job-runner["<b>job-runner</b>"]
-      tmdb-backend["<b>tmdb-backend</b>"]
-      tmdb-frontend["<b>tmdb-frontend</b>"]
+      tmdb-redis["<b>tmdb-redis</b><br/><small>v7-alpine</small>"]
+      spark-master["<b>spark-master</b><br/><small>apache/spark:3.5.1</small>"]
+      spark-worker["<b>spark-worker</b><br/><small>apache/spark:3.5.1</small>"]
+      job-runner["<b>job-runner</b><br/><small>apache/spark:3.5.1</small>"]
+      tmdb-backend["<b>tmdb-backend</b><br/><small>📦 tmdb-backend:build</small>"]
+      tmdb-frontend["<b>tmdb-frontend</b><br/><small>📦 tmdb-frontend:build</small>"]
       spark-master -- depends_on (service_started) --> tmdb-redis
       linkStyle 0 stroke-width:2,stroke-dasharray:2 3
       spark-worker -- depends_on (service_started) --> spark-master
@@ -46,9 +46,6 @@
       style job-runner fill:#C78DAF,stroke:#797497,stroke-width:3,stroke-dasharray:0
       style tmdb-backend fill:#479387,stroke:#2c5952,stroke-width:3,stroke-dasharray:0
       style tmdb-frontend fill:#42b883,stroke:#35495e,stroke-width:3,stroke-dasharray:0
-
-
-
 
 ```
 
