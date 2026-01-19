@@ -1,57 +1,8 @@
 # TMDb Spark Recommendation Extension
 
-## Structure
+## Project Architecture
 
-```mermaid
-%%{init: {  "theme": "forest",  "themeVariables": {    "background": "#f5f5f5"  }}}%%
- graph BT
- subgraph BG[" "]
- direction BT
-  subgraph Network_spark-net[<b>Network: spark-net</b>]
-    redis["<b>redis</b> <small>(tmdb-redis)</small><br/><small>redis:</small><small>7-alpine</small>"]
-    spark-master["<b>spark-master</b><br/><small>apache/spark:</small><small>3.5.1</small>"]
-    spark-worker["<b>spark-worker</b><br/><small>apache/spark:</small><small>3.5.1</small>"]
-    job-runner["<b>job-runner</b><br/><small>apache/spark:</small><small>3.5.1</small>"]
-  end
-  style Network_spark-net fill:#acbde5,stroke:#8bb4df,stroke-width:2,stroke-dasharray:0
-  subgraph Network_tmdb-net[<b>Network: tmdb-net</b>]
-    redis["<b>redis</b> <small>(tmdb-redis)</small><br/><small>redis:</small><small>7-alpine</small>"]
-    backend["<b>backend</b> <small>(tmdb-backend)</small><br/><small>python:</small><small>3.10-slim</small>"]
-    frontend["<b>frontend</b> <small>(tmdb-frontend)</small><br/><small>node:</small><small>20-alpine</small>"]
-  end
-  style Network_tmdb-net fill:#EBDBD1,stroke:#DDCEBC,stroke-width:2,stroke-dasharray:0
-  redis["<b>redis</b> <small>(tmdb-redis)</small><br/><small>redis:</small><small>7-alpine</small>"]
-  spark-master["<b>spark-master</b><br/><small>apache/spark:</small><small>3.5.1</small>"]
-  spark-worker["<b>spark-worker</b><br/><small>apache/spark:</small><small>3.5.1</small>"]
-  job-runner["<b>job-runner</b><br/><small>apache/spark:</small><small>3.5.1</small>"]
-  backend["<b>backend</b> <small>(tmdb-backend)</small><br/><small>python:</small><small>3.10-slim</small>"]
-  frontend["<b>frontend</b> <small>(tmdb-frontend)</small><br/><small>node:</small><small>20-alpine</small>"]
-  end
-  spark-master -- depends_on (service_started) --> redis
-  linkStyle 0 stroke-width:2,stroke-dasharray:5 5
-  spark-worker -- depends_on (service_started) --> spark-master
-  linkStyle 1 stroke-width:2,stroke-dasharray:5 5
-  job-runner -- depends_on (service_started) --> spark-worker
-  linkStyle 2 stroke-width:2,stroke-dasharray:5 5
-  backend -- depends_on (service_completed_successfully) --> job-runner
-  linkStyle 3 stroke-width:2,stroke-dasharray:0
-  backend -- depends_on (service_started) --> spark-master
-  linkStyle 4 stroke-width:2,stroke-dasharray:5 5
-  backend -- depends_on (service_started) --> spark-worker
-  linkStyle 5 stroke-width:2,stroke-dasharray:5 5
-  backend -- depends_on (service_started) --> redis
-  linkStyle 6 stroke-width:2,stroke-dasharray:5 5
-  frontend -- depends_on (service_started) --> backend
-  linkStyle 7 stroke-width:2,stroke-dasharray:5 5
-  style redis fill:#D82C20,stroke:#7A0C00,stroke-width:2,stroke-dasharray:0
-  style spark-master fill:#F69824,stroke:#E4682A,stroke-width:2,stroke-dasharray:0
-  style spark-worker fill:#CC2336,stroke:#A22160,stroke-width:2,stroke-dasharray:0
-  style job-runner fill:#C78DAF,stroke:#797497,stroke-width:2,stroke-dasharray:0
-  style backend fill:#479387,stroke:#2c5952,stroke-width:2,stroke-dasharray:0
-  style frontend fill:#42b883,stroke:#35495e,stroke-width:2,stroke-dasharray:0
-  style BG fill:#f5f5f5,stroke:#cccccc,stroke-width:2,rx:12,ry:12
-
-```
+  ![Architecture Diagram](./screenshots/docker-compose.svg)
 
 ## Overview
 
