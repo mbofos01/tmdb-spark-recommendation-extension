@@ -1,4 +1,7 @@
 x-wharfmap:
+  backgroundColor: "#f5f5f5"
+  backgroundBorderColor: "#cccccc"
+  backgroundBorderWidth: 2
   networks:
     tmdb-net:
       color: "#EBDBD1"          # Light blue for frontend network
@@ -10,7 +13,13 @@ x-wharfmap:
       border-color: "#8bb4df"
       border-width: "2px"
       border-style: "solid"
-
+  conditions:
+    service_started:
+      stroke-width: "2px"
+      stroke-dasharray: "5 5"
+    service_completed_successfully:
+      stroke-width: "2px"
+      stroke-dasharray: "0"
 services:
   redis:
     image: redis:7-alpine
