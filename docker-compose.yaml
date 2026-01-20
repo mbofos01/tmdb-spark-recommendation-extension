@@ -1,5 +1,5 @@
 x-wharfmap:
-  backgroundColor: "#f5f5f5"
+  backgroundColor: "#f5f5f583"
   backgroundBorderColor: "#cccccc"
   backgroundBorderWidth: 2
   networks:
